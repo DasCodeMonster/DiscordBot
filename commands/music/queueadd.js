@@ -3,13 +3,13 @@ const ytdl = require("ytdl-core");
 const google = require('googleapis');
 const youtubeV3 = google.youtube({version: "v3", auth: ""});
 
-class QueueAdd extends commando.Command {
+
+class QueueAddold extends commando.Command {
     constructor(client) {
         super(client, {
-            name: "queueadd",
-            aliases: ["qa", "qadd, add"],
+            name: "queueaddold",
             group: "music",
-            memberName: "queueadd",
+            memberName: "queueaddold",
             description: "Adds a song to the queue",
             guildOnly: true,
             args: [{
@@ -142,7 +142,46 @@ class QueueAdd extends commando.Command {
         });
         console.log(validation);
         if (validation == false) {
-            addPlaylist(args.link, this.client, message);
+            //await addPlaylist(args.link, this.client, message);
+            console.log(this.client.provider.get(message.guild, "queue"));
+            if (message.guild.voiceConnection){
+                await this.playlist(message, args);
+                console.log(this.client.provider.get(message.guild, "queue"));
+                if (message.guild.voiceConnection.speaking) return;
+                else {
+                    try{
+                        //console.log(this.client.provider.get(message.guild, "queue"));
+                        var queue = this.client.provider.get(message.guild, "queue");
+                        var stream = await ytdl(queue[0], {filter: "audioonly"});
+                        var vidInfo = await ytdl.getInfo(queue[0]);                        
+                        this.play(message, stream, vidInfo);
+                        queue.splice(0,1);
+                        this.client.provider.set(message.guild, "queue", queue);
+                    }
+                    catch (err){
+                        console.log(err);
+                    }
+                }
+            }
+            else{
+                if (message.member.voiceChannel) {
+                    message.member.voiceChannel.join();
+                    await this.playlist(message, args);
+                    try{
+                        //console.log(this.client.provider.get(message.guild, "queue"));
+                        var queue = this.client.provider.get(message.guild, "queue");
+                        console.log(queue);
+                        var stream = await ytdl(queue[0], {filter: "audioonly"});
+                        var vidInfo = await ytdl.getInfo(queue[0]);                        
+                        this.play(message, stream, vidInfo);
+                        queue.splice(0,1);
+                        this.client.provider.set(message.guild, "queue", queue);
+                    }
+                    catch (err){
+                        console.log(err);
+                    }
+                }
+            }
             return;
         }
         var vidInfo = await ytdl.getInfo(args.link);
@@ -160,126 +199,103 @@ class QueueAdd extends commando.Command {
                 }
             }
             else {
-                message.guild.voiceConnection.playStream(stream);
-                if (this.client.provider.get(message.guild, "volume")) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
-                else message.guild.voiceConnection.dispatcher.setVolume(0.3);
-                console.log(message.guild.voiceConnection.dispatcher.volume);
-                message.channel.send("Now playing: "+vidInfo.title);                
-                message.guild.voiceConnection.dispatcher.on("end", reason => {
-                    onEnd(this.client, message);
-                });
+                this.play(message, stream);
             }
         }        
         else {
             if (message.member.voiceChannel) {
                 await message.member.voiceChannel.join();
-                message.guild.voiceConnection.playStream(stream);
-                if (this.client.provider.get(message.guild, "volume")) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
-                else message.guild.voiceConnection.dispatcher.setVolume(0.3);
-                console.log(message.guild.voiceConnection.dispatcher.volume);
-                message.channel.send("Now playing: "+vidInfo.title);                
-                message.guild.voiceConnection.dispatcher.on("end", reason => {
-                    onEnd(this.client, message);
-                });        
+                this.play(message, stream);   
             }
             else {
                 message.reply("you need to join a voiceChannel first!");
             }
         }
-        async function onEnd(client, message) {
-            console.log("File ended");
-            console.log(client.provider.get(message.guild, "queue"));
-            console.log(client.provider.get(message.guild, "queue").length);
-            if (client.provider.get(message.guild, "queue").length > 0) {
-                var queue = await client.provider.get(message.guild, "queue");
-                message.guild.voiceConnection.playStream(await ytdl(queue[0], {filter: "audioonly"}));
-                if (client.provider.get(message.guild, "volume")) message.guild.voiceConnection.dispatcher.setVolume(client.provider.get(message.guild, "volume"));
-                else message.guild.voiceConnection.dispatcher.setVolume(0.3);
-                console.log(message.guild.voiceConnection.dispatcher.volume);
-                var info = await ytdl.getInfo(queue[0])
-                message.channel.send("Now playing: "+info.title);
-                var rest = queue.splice(0, 1);
-                console.log("rest: "+rest);
-                console.log(queue);
-                client.provider.set(message.guild, "queue", queue);
-                console.log(client.provider.get(message.guild, "queue"));                
-                message.guild.voiceConnection.dispatcher.on("end", reason => {
-                    onEnd(client, message);
-                });
-            }
-            else {
-                console.log("queue is empty");
-                return;
-            }
+    }
+    async playlist(message, args) {
+        var listId = args.link.split("list=")[1];
+        console.log(listId);
+        if (this.client.provider.get(message.guild, "queue")) {
+            this.queue = await this.client.provider.get(message.guild, "queue");
         }
-        async function addPlaylist(args, client, message){
-            if (message.guild.voiceConnection){
-                await helperfunc(args, client, message);
+        await youtubeV3.playlistItems.list({
+            part: 'snippet',
+            playlistId: 'PL2HX79P_2flhzjLjma7NcLoTsMyq167E0',
+            maxResults: "50"
+          }, async (err, results) => {
+            if (err) return;
+            console.log(results.pageInfo.totalResults);
+            var pages = results.pageInfo.totalResults/50;
+            pages = Math.ceil(pages);
+            console.log(pages);
+            for (var items in results.items) {
+                this.queue.push(results.items[items].snippet.resourceId.videoId);
             }
-            else {
-                if (message.member.voiceChannel){
-                    message.member.voiceChannel.join();
-                    await helperfunc(args, client, message)
-                }
-            }
-        }
-        async function helperfunc(args, client, message) {
-            var listId = args.split("list=")[1];
-            console.log(listId);
-            await client.provider.remove(message.guild, "queue");
-            console.log(client.provider.get(message.guild, "queue"));
-            if (client.provider.get(message.guild, "queue")) {
-                var queue = await client.provider.get(message.guild, "queue");
-            }
-            else {
-                var queue = [];
-            }
-            await youtubeV3.playlistItems.list({
+            //this.client.provider.set(message.guild, "queue", this.queue);
+            console.log(results.nextPageToken);
+            await getPlaylistItems(results.nextPageToken, this.client, message, queue);
+            message.reply("I added ``"+this.client.provider.get(message.guild, "queue").length+"`` songs to the queue!");
+
+        });
+        function getPlaylistItems(PageToken, client, message, queue){
+            youtubeV3.playlistItems.list({
                 part: 'snippet',
                 playlistId: 'PL2HX79P_2flhzjLjma7NcLoTsMyq167E0',
-                maxResults: "50"
-            }, (err, results) => {
-                if (err) {
-                    message.reply("invalid link!");
-                    console.log(err);
-                    return;
-                }
-                console.log(results.pageInfo.totalResults);
-                var pages = results.pageInfo.totalResults/50;
+                maxResults: "50",
+                pageToken: PageToken
+              }, (err, nextPageResults) => {
+                if (err) return;
+                console.log(nextPageResults.pageInfo.totalResults);
+                var pages = nextPageResults.pageInfo.totalResults/50;
                 pages = Math.ceil(pages);
-                console.log(pages);
-                for (var items in results.items) {
-                    queue.push(results.items[items].snippet.resourceId.videoId);
-                    client.provider.set(message.guild, "queue", queue);
+                for (var items in nextPageResults.items) {
+                    queue.push(nextPageResults.items[items].snippet.resourceId.videoId);
                 }
-                console.log(results.nextPageToken);
-                await getPlaylistItems(results.nextPageToken, client, message);
-                console.log(client.provider.get(message.guild, "queue"));
-                console.log(client.provider.get(message.guild, "queue").length);
+                client.provider.set(message.guild, "queue", queue);
+                if (nextPageResults.nextPageToken){
+                getPlaylistItems(nextPageResults.nextPageToken, client, queue);
+                }
+                else{
+                    console.log(client.provider.get(message.guild, "queue"));
+                    return;   
+                }
             });
-            function getPlaylistItems(PageToken, client, message){
-                youtubeV3.playlistItems.list({
-                    part: 'snippet',
-                    playlistId: 'PL2HX79P_2flhzjLjma7NcLoTsMyq167E0',
-                    maxResults: "50",
-                    pageToken: PageToken
-                }, (err, nextPageResults) => {
-                    if (err) return;
-                    console.log(nextPageResults.pageInfo.totalResults);
-                    var pages = nextPageResults.pageInfo.totalResults/50;
-                    pages = Math.ceil(pages);
-                    for (var items in nextPageResults.items) {
-                        queue.push(nextPageResults.items[items].snippet.resourceId.videoId);
-                        client.provider.set(message.guild, "queue", queue);
-                    }
-                    console.log(nextPageResults.nextPageToken);
-                    if (nextPageResults.nextPageToken){
-                    getPlaylistItems(nextPageResults.nextPageToken, client);
-                    }
-                    else return;
-                });
-            }
+        }
+    }
+    async play(message, stream, vidInfo){
+        message.guild.voiceConnection.playStream(stream);
+        if (this.client.provider.get(message.guild, "volume")) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
+        else message.guild.voiceConnection.dispatcher.setVolume(0.3);
+        console.log(message.guild.voiceConnection.dispatcher.volume);
+        message.channel.send("Now playing: "+vidInfo.title);                
+        message.guild.voiceConnection.dispatcher.on("end", reason => {
+            this.onEnd(message);
+        });
+    }
+    async onEnd(message) {
+        console.log("File ended");
+        console.log(this.client.provider.get(message.guild, "queue"));
+        console.log(this.client.provider.get(message.guild, "queue").length);
+        if (this.client.provider.get(message.guild, "queue").length > 0) {
+            var queue = await this.client.provider.get(message.guild, "queue");
+            message.guild.voiceConnection.playStream(await ytdl(queue[0], {filter: "audioonly"}));
+            if (this.client.provider.get(message.guild, "volume")) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
+            else message.guild.voiceConnection.dispatcher.setVolume(0.3);
+            console.log(message.guild.voiceConnection.dispatcher.volume);
+            var info = await ytdl.getInfo(queue[0])
+            message.channel.send("Now playing: "+info.title);
+            var rest = queue.splice(0, 1);
+            console.log("rest: "+rest);
+            console.log(queue);
+            this.client.provider.set(message.guild, "queue", queue);
+            console.log(this.client.provider.get(message.guild, "queue"));                
+            message.guild.voiceConnection.dispatcher.on("end", reason => {
+                this.onEnd(message);
+            });
+        }
+        else {
+            console.log("queue is empty");
+            return;
         }
     }
 }
-module.exports = QueueAdd;
