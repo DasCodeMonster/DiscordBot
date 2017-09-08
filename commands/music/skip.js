@@ -14,3 +14,4 @@ class Skip extends commando.Command {
         message.guild.voiceConnection.dispatcher.end("skiped song");
     }
 }
+module.exports = Skip;

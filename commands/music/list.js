@@ -2,7 +2,6 @@ const commando = require("discord.js-commando");
 const ytdl = require("ytdl-core");
 const google = require('googleapis');
 const youtubeV3 = google.youtube({version: "v3", auth: ""});
-const async = require("async");
 
 class List extends commando.Command {
     constructor(client) {
@@ -64,7 +63,7 @@ class List extends commando.Command {
         if (this.speaking){
             message.reply("OK, i added: "+info.title+" to the queue!");
             console.log(this.queue.length);
-            this.client.provider.set(message.guild, "queue");
+            this.client.provider.set(message.guild, "queue", this.queue);
         }
         else {
             this.play(message);
@@ -85,8 +84,10 @@ class List extends commando.Command {
             else {
                 console.log(data);
                 data.items.forEach(item => {
-                    console.log(item.snippet.resourceId.videoId);
-                    this.queue.push(item.snippet.resourceId.videoId);
+                    if (item.snippet.resourceId.videoId) {
+                        console.log(item.snippet.resourceId.videoId);
+                        this.queue.push(item.snippet.resourceId.videoId);
+                    }
                 });
                 if (data.nextPageToken) {
                     this.fetchAllPages(listId, data.nextPageToken, err => {
@@ -123,14 +124,18 @@ class List extends commando.Command {
             }
             else{
                 nextPageResults.items.forEach(item => {
-                    this.queue.push(item.videoId);
-                    console.log(item.videoId);
+                    if (item.snippet.resourceId.videoId) {
+                        console.log(item.snippet.resourceId.videoId);
+                        this.queue.push(item.snippet.resourceId.videoId);
+                    }
                 });
             }
             if (nextPageResults.nextPageToken){
                 this.fetchAllPages(listId, nextPageResults.nextPageToken);
             }
-            callback(null);
+            else{
+                callback(null);
+            }
         });
     }
     async play(message) {
@@ -153,29 +158,35 @@ class List extends commando.Command {
         message.guild.voiceConnection.dispatcher.on("end", reason => {
             this.onEnd(message);
         });
+        message.guild.voiceConnection.dispatcher.on("error", error => {
+            console.log(error);
+            this.onEnd(message);
+        });
     }
     async onEnd(message) {
         console.log("File ended");
-        if (this.client.provider.get(message.guild, "queue").length > 0) {
+        if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 0) {
             var queue = await this.client.provider.get(message.guild, "queue");
             var testinfo = await ytdl.getInfo(queue[0]).catch(async err => {
                 console.log("info err");
                 console.log(err);
                 queue.splice(0, 1);
-                await this.client.provider.set(message.guild, "queue");
+                await this.client.provider.set(message.guild, "queue", queue);
                 this.onEnd(message);
+                return;
             });
             try {
                 var stream = await ytdl(queue[0], {filter: "audioonly"});
-                message.guild.voiceConnection.playStream(stream, {filter: "audioonly"});
             }
             catch (err) {
-                console.log("erroro");
+                console.log("error");
                 console.log(err);
                 queue.splice(0, 1);
-                await this.client.provider.set(message.guild, queue);
+                await this.client.provider.set(message.guild, "queue", queue);
                 this.onEnd(message);
+                return;
             }
+            message.guild.voiceConnection.playStream(stream, {filter: "audioonly"});            
             if (this.client.provider.get(message.guild, "volume")) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
             else message.guild.voiceConnection.dispatcher.setVolume(0.3);
             var info = await ytdl.getInfo(queue[0]);

@@ -1,9 +1,7 @@
 const commando = require("discord.js-commando");
 const ytdl = require("ytdl-core");
 const google = require('googleapis');
-const { oneLine, stripIndents } = require('common-tags');
 const youtubeV3 = google.youtube({version: "v3", auth: ""});
-const util = require("util");
 
 class PlayCommand extends commando.Command {
     constructor(client) {

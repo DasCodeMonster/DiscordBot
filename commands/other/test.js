@@ -1,7 +1,7 @@
 const commando = require("discord.js-commando");
 const ytdl = require("ytdl-core");
 const google = require('googleapis');
-const youtubeV3 = google.youtube({version: "v3", auth: "AIzaSyApX2CuRu1pG87gypEUcmG2gQyPAsC3bns"});
+const youtubeV3 = google.youtube({version: "v3", auth: ""});
 
 class TestCommand extends commando.Command {
     constructor(client) {

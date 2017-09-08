@@ -2,7 +2,6 @@ const commando = require("discord.js-commando");
 const ytdl = require("ytdl-core");
 const google = require('googleapis');
 const youtubeV3 = google.youtube({version: "v3", auth: ""});
-const async = require("async");
 
 class Playlist extends commando.Command {
     constructor(client) {
