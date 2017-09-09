@@ -318,20 +318,27 @@ class PlayCommand extends commando.Command {
         console.log(oneLiner);
         var commandmsg = await message.reply("type the number of the song to play:\n"+oneLiner+"Respond with ``cancel`` to cancel the command.\n"+
             "The command will automatically be cancelled in 30 seconds, unless you respond.");
-        const responses = await message.channel.awaitMessages(msg2 => msg2.author.id === message.author.id, {
+        const responses = await message.channel.awaitMessages(msg2 => {
+            if (msg2.author.id === message.author.id) {
+                msg2.delete();
+                return true;
+            }}, {
             maxMatches: 1,
             time: 30000,
             errors: ["time"]
         });
         var value;
+        console.log(responses);
         if(responses && responses.size === 1) value = responses.first().content; else return null;
         if(value.toLowerCase() === 'cancel') {
             commandmsg.delete();
             return null;
         }
+        message
         commandmsg.delete();
         console.log(value);
-        await this.play(message, response.items[value-1].snippet.resourceId.videoId);
+        console.log(response.items[value-1].id.videoId);
+        await this.play(message, response.items[value-1].id.videoId);
     }
     async play(message, vidID) {
         this.client.provider.set(message.guild, "queue", this.queue);

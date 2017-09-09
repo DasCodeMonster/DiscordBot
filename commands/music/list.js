@@ -158,16 +158,38 @@ class List extends commando.Command {
         message.guild.voiceConnection.dispatcher.on("end", reason => {
             this.onEnd(message);
         });
-        message.guild.voiceConnection.dispatcher.on("error", error => {
+        /*message.guild.voiceConnection.dispatcher.on("error", error => {
             console.log(error);
             this.onEnd(message);
-        });
+        });*/
     }
     async onEnd(message) {
         console.log("File ended");
         if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 0) {
             var queue = await this.client.provider.get(message.guild, "queue");
-            var testinfo = await ytdl.getInfo(queue[0]).catch(async err => {
+            await ytdl.getInfo(queue[0], async (err, info) => {
+                if (err) {
+                    console.log(err);
+                    queue.splice(0, 1);
+                    await this.client.provider.set(message.guild, "queue", queue);
+                    this.onEnd(message);
+                    return;
+                }
+                else {
+                    var stream = await ytdl(queue[0], {filter: "audioonly"});
+                    message.guild.voiceConnection.playStream(stream, {filter: "audioonly"});            
+                    if (this.client.provider.get(message.guild, "volume")) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
+                    else message.guild.voiceConnection.dispatcher.setVolume(0.3);
+                    message.channel.send("Now playing: "+info.title);
+                    queue.splice(0, 1);
+                    this.client.provider.set(message.guild, "queue", queue);
+                    message.guild.voiceConnection.dispatcher.on("end", reason => {
+                        if (reason) console.log(reason);
+                        this.onEnd(message);
+                    });
+                }
+            });
+            /*var testinfo = await ytdl.getInfo(queue[0]).catch(async err => {
                 console.log("info err");
                 console.log(err);
                 queue.splice(0, 1);
@@ -196,7 +218,7 @@ class List extends commando.Command {
             message.guild.voiceConnection.dispatcher.on("end", reason => {
                 if (reason) console.log(reason);
                 this.onEnd(message);
-            });
+            });*/
         }
         else {
             console.log("queue is empty");

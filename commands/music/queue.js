@@ -35,16 +35,23 @@ class Queue extends commando.Command {
         console.log(queue);
         if (queue && queue.length > 0) {
             message.reply(queue);
-            queue.forEach(song => {
+            queue.some((song, index) => {
                ytdl.getInfo(song, (err, info) => {
                    if (err) console.log(err);
                    else {
                        console.log(info.title);
                        this.titles.push(info.title);
                    }
-                }); 
+                });
+                if (index == 25) {
+                    this.finished();
+                    return true;
+                }
             });
         }
+    }
+    finished() {
+        console.log("finshed");
         var messageBuilder = "";
         this.titles.forEach(title => {
             messageBuilder += title +"\n";
