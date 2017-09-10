@@ -14,6 +14,7 @@ class QueueRemove extends commando.Command {
     async run(message, args) {
         //this.queue = this.client.provider.get(message.guild, "queue");
         await this.client.provider.remove(message.guild, "queue");
+        console.log(this.client.provider.get(message.guild, "queue"));
         await this.client.provider.set(message.guild, "queue", this.queue);
         console.log(this.client.provider.get(message.guild, "queue"));
     }

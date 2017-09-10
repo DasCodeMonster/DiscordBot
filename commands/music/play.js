@@ -320,6 +320,7 @@ class PlayCommand extends commando.Command {
             "The command will automatically be cancelled in 30 seconds, unless you respond.");
         const responses = await message.channel.awaitMessages(msg2 => {
             if (msg2.author.id === message.author.id) {
+                console.log(msg2.id);
                 msg2.delete();
                 return true;
             }}, {
@@ -376,4 +377,4 @@ class PlayCommand extends commando.Command {
         }
     }
 }
-module.exports = PlayCommand;
+module.exports = PlayCommand;   

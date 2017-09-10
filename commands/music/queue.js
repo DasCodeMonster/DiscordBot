@@ -11,53 +11,23 @@ class Queue extends commando.Command {
             description: "This command shows you all the queued songs!",
             guildOnly: true
         });
-        this.titles = [];
+        this.queue = [];
     }
     async run(message, args){
-        /*var queue = this.client.provider.get(message.guild, "queue");
-        var messageBuilder = "";
-        if (queue && queue != []){
-            var i = 0;
-            queue.forEach(async (songID) => {
-                console.log(songID);
-                messageBuilder += await ytdl.getInfo(songID).catch(err => {
-                    console.log(err);
-                }); + "\n";
-                if (i == 50) return;
-                i++;
+        if (this.client.provider.get(message.guild, "queue")) this.queue = await this.client.provider.get(message.guild, "queue");
+        console.log(this.queue);
+        if (this.queue.length == 0) {
+            message.reply("The queue is empty!");
+            return;
+        }
+        else {
+            var messageBuilder = "```";
+            await this.queue.forEach(song => {
+                messageBuilder += song[1] + "\n";
             });
+            messageBuilder += "```";
             message.reply(messageBuilder);
         }
-        else{
-            message.reply('you havent add any songs to the queue yet.\n Add songs to the queue with ``!qa <link>``');
-        }*/
-        var queue = await this.client.provider.get(message.guild, "queue");
-        console.log(queue);
-        if (queue && queue.length > 0) {
-            message.reply(queue);
-            queue.some((song, index) => {
-               ytdl.getInfo(song, (err, info) => {
-                   if (err) console.log(err);
-                   else {
-                       console.log(info.title);
-                       this.titles.push(info.title);
-                   }
-                });
-                if (index == 25) {
-                    this.finished();
-                    return true;
-                }
-            });
-        }
-    }
-    finished() {
-        console.log("finshed");
-        var messageBuilder = "";
-        this.titles.forEach(title => {
-            messageBuilder += title +"\n";
-        });
-        console.log(messageBuilder);
-        console.log(this.titles.length);
     }
 }
 module.exports = Queue;
