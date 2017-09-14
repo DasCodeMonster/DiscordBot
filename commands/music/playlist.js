@@ -1,7 +1,8 @@
 const commando = require("discord.js-commando");
 const ytdl = require("ytdl-core");
+const keys = require('./../../Token&Keys');
 const google = require('googleapis');
-const youtubeV3 = google.youtube({version: "v3", auth: ""});
+const youtubeV3 = google.youtube({version: "v3", auth: keys.YoutubeAPIKey});
 
 class Playlist extends commando.Command {
     constructor(client) {

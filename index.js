@@ -1,6 +1,7 @@
 const Commando = require('discord.js-commando');
 const path = require('path');
 const sqlite = require('sqlite');
+const keys = require('./Token&Keys');
 
 const client = new Commando.Client({
     owner: '',
@@ -224,7 +225,7 @@ client.on("warn", info => {
 
 });
 console.log("bot is logging in...");
-client.login("").catch(console.error);
+client.login(keys.BotToken).catch(console.error);
 console.log("bot is logged in");
 
 process.once('SIGINT', () => {
