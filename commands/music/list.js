@@ -83,7 +83,6 @@ class List extends commando.Command {
                 message.reply("this is not a valid link");
             }
             else {
-                console.log(data);
                 data.items.forEach(item => {
                     if (item.snippet.resourceId.videoId) {
                         console.log(item.snippet.resourceId.videoId);
@@ -113,6 +112,7 @@ class List extends commando.Command {
         });
     }
     async fetchAllPages(listId, PageToken, callback) {
+        console.log(callback);
         await youtubeV3.playlistItems.list({
             part: 'snippet',
             playlistId: listId,
@@ -132,7 +132,7 @@ class List extends commando.Command {
                 });
             }
             if (nextPageResults.nextPageToken){
-                this.fetchAllPages(listId, nextPageResults.nextPageToken);
+                this.fetchAllPages(listId, nextPageResults.nextPageToken, callback);
             }
             else{
                 callback(null);
