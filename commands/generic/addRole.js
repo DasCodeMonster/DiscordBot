@@ -4,6 +4,7 @@ class AddRole extends commando.Command {
     constructor(client) {
         super(client, {
             name: "addrole",
+            aliases: ["ar"],
             group: "generic",
             memberName: "addrole",
             description: "add a role which guildmembers can join with the ``joinRole`` command",
@@ -23,6 +24,7 @@ class AddRole extends commando.Command {
         if (this.client.provider.get(message.guild, "joinableRoles")) this.roles = this.client.provider.get(message.guild, "joinableRoles");
         this.roles.push(args.role);
         this.client.provider.set(message.guild, "joinableRoles", this.roles);
+        message.reply("added "+args.role+" to the ``joinable roles``!");
     }
 }
 module.exports = AddRole;

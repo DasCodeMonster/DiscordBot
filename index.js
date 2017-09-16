@@ -5,7 +5,7 @@ const sqlite = require('sqlite');
 const keys = require('./Token&Keys');
 
 const client = new Commando.Client({
-    owner: '',
+    owner: keys.OwnerID,
     unknownCommandRespond: false
 });
 client.registry.registerGroup("music", "Music commands");
