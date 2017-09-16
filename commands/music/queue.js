@@ -22,9 +22,9 @@ class Queue extends commando.Command {
         else {
             var messageBuilder = "```";
             await this.queue.some((element, index) => {
-                if (index === 50) return true;
+                if (index === 50 || messageBuilder.length >= 1800) return true;
                 else {
-                    messageBuilder += element[1] + "\n";
+                    messageBuilder += (index+1)+" "+element[1] + "\n";
                     return false;
                 }
             });

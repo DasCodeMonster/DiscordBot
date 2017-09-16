@@ -1,4 +1,5 @@
 const Commando = require('discord.js-commando');
+const time = require("node-datetime");
 const path = require('path');
 const sqlite = require('sqlite');
 const keys = require('./Token&Keys');
@@ -10,6 +11,8 @@ const client = new Commando.Client({
 client.registry.registerGroup("music", "Music commands");
 client.registry.registerGroup("fun", "Fun commands");
 client.registry.registerGroup("other", "other commands");
+client.registry.registerGroup("points", "Commands related to your points");
+client.registry.registerGroup("generic", "Generic commands");
 client.registry.registerDefaults();
 client.registry.registerCommandsIn(path.join(__dirname, 'commands'));
 client.setProvider(
@@ -18,7 +21,35 @@ client.setProvider(
 
 client.on("ready", () => {
     console.log("bot startet")
-})
+    function repeatEvery(func, interval) {
+        // Check current time and calculate the delay until next interval
+        var now = new Date(),
+            delay = interval - now % interval;
+        console.log(now);
+        console.log(now%interval);
+        console.log(delay);
+        function start() {
+            // Execute function now...
+            func();
+            // ... and every interval
+            setInterval(func, interval);
+        }
+    
+        // Delay execution until it's an even interval
+        setTimeout(start, delay);
+    }
+    repeatEvery(() => {
+        console.log(time.create().format("H:M:S"));
+        client.guilds.array().forEach(Guild => {
+            Guild.members.array().forEach(member => {
+                if (member.user.presence.status != "online") return;
+                if (client.provider.get(Guild, member.id)) var points = client.provider.get(Guild, member.id);
+                else var points = 0;
+                client.provider.set(Guild, member.id, points+10);
+            });
+        });
+    }, 200000);
+});
 client.on("channelCreate", channel => {
     
 });
@@ -60,81 +91,19 @@ client.on("guildBanRemove", (guild, user) => {
 });
 client.on("guildCreate", Guild => {
     console.log("Serving now Guild with name: "+Guild.name);
-    /*var memberlist = [];
-    console.log(Guild.members.forEach(member => {
-        console.log(member.id);
-        console.log(member.user.username);
-        memberlist.push({
-            name: member.user.username,
-            id: member.id,
-            isBot: member.user.bot,
-            joinedAt: member.joinedAt
-        });
-    }));
-    console.log(memberlist);
-    data["Guild"].push({name: Guild.name,
-        id: Guild.id, 
-        owner: {
-            name: Guild.owner.displayName, 
-            id: Guild.ownerID}, 
-        afkChannelID: Guild.afkChannelID,
-        member:memberlist,
-        voice:{
-            channelid: null,
-            queue: [],
-            volume: 0.3
-        }
-    });
-    var newdata = JSON.stringify(data, null, 4);
-    console.log(newdata);
-    fs.writeFile("./data.json", newdata, function(err, data){
-        if(err) throw err;
-        console.log("done!");
-    });
-    */
+    
 });
 client.on("guildDelete", Guild => {
     console.log("Not serving anymore Guild with name: "+ Guild.name);
-    /*var guild = where(data.Guild, {id:Guild.id});
-    var index = data.Guild.indexOf(guild[0]);
-    if (index > -1) data.Guild.splice(index, 1);
-    fs.writeFile("./data.json", JSON.stringify(data, null, 4), function(err, data){
-        if (err) throw err;
-        console.log("deletet guild with index:"+index);
-    });
-    */
 });
 client.on("guildMemberAdd", member => {
-    /*var guild = where(data.Guild, {id:member.guild.id});
-    guild[0].member.push({
-        username:member.user.username,
-        id:member.id,
-        isBot: member.user.bot,
-        joinedAt: member.joinedAt
-    });
-    fs.writeFile("./data.json", JSON.stringify(data, null, 4), function(err, data) {
-        if (err) throw err;
-        console.log("added member!");
-    });
-    */
+
 });
 client.on("guildMemberAvailable", member => {
 
 });
 client.on("guildMemberRemove", member => {
-    /*var guild = where(data.Guild, {id:member.guild.id});
-    console.log(guild);
-    console.log(guild[0].member);
-    var Member = where(guild[0].member, {id:member.id});
-    console.log(Member);
-    var index =  guild[0].member.indexOf(Member[0], 1);
-    console.log(index);
-    if (index > -1) guild[0].member.splice(index, 1);
-    fs.writeFile("./data.json", JSON.stringify(data, null, 4), function(err, data){
-        if (err) throw err;
-        console.log("removed Member!");
-    });
-    */
+
 });
 client.on("guildMembersChunk", (members, guild) => {
 
@@ -149,20 +118,7 @@ client.on("guildUnavailable", guild => {
 
 });
 client.on("guildUpdate", (oldGuild, newGuild) => {
-    /*var guild = where(data.Guild, {id:oldGuild.id});
-    console.log(guild[0].name);
-    guild[0].name = newGuild.name;
-    guild[0].id = newGuild.id;
-    guild[0].owner = {
-        name: newGuild.owner.user.username,
-        id: newGuild.ownerID
-    };
-    guild[0].afkChannelID = newGuild.afkChannelID;
-    fs.writeFile("./data.json", JSON.stringify(data, null, 4), function(err, data){
-        if (err) throw err;
-        console.log("updated Guild!");
-    });
-    */
+
 });
 client.on("message", async message => {
     if (message.author.bot) return;
@@ -172,6 +128,7 @@ client.on("message", async message => {
         console.log(reason);
 
     });*/
+    
 });
 client.on("messageDelete", async message => {
     
