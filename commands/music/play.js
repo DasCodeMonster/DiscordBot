@@ -50,22 +50,14 @@ class PlayCommand extends commando.Command {
                 await this.search(message, args);
             }
             else{
-                await this.addSingle(message, args, info);
-                info.video_id
+                this.play(message, info.video_id);
+                //await this.addSingle(message, args, info);
             }
         });
     }
     async addSingle(message, args, info) {
         console.log(info.video_id);
-        this.queue.push(info.video_id);
-        if (this.speaking){
-            message.reply("OK, i added: "+info.title+" to the queue!");
-            console.log(this.queue.length);
-            this.client.provider.set(message.guild, "queue");
-        }
-        else {
-            this.play(message);
-        }
+        this.play(message, info.video_id);
     }
     async search(message, args) {
         var oneLiner = "you searched for: " +args.link+"\nResults:\n"+"```";
@@ -111,6 +103,7 @@ class PlayCommand extends commando.Command {
         await this.play(message, response.items[value-1].id.videoId);
     }
     async play(message, vidID) {
+        console.log(vidID);
         this.client.provider.set(message.guild, "queue", this.queue);
         var stream = ytdl(vidID);
         var info = await ytdl.getInfo(vidID).catch(err => {

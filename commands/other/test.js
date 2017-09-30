@@ -4,6 +4,7 @@ const ytdl = require("ytdl-core");
 const keys = require('./../../Token&Keys');
 const google = require('googleapis');
 const youtubeV3 = google.youtube({version: "v3", auth: keys.YoutubeAPIKey});
+const Song = require("./Song");
 
 class TestCommand extends commando.Command {
     constructor(client) {
@@ -17,34 +18,17 @@ class TestCommand extends commando.Command {
         this.queue = [];
         this.speaking;
     }
-
     async run(message, args) {
-        message.reply(time.create().format("M"));
-        /*var points = setInterval(() => {
-            message.channel.send(time.create().format("H:M:S"));
-        }, 30000);*/
-
-
-        function repeatEvery(func, interval) {
-            // Check current time and calculate the delay until next interval
-            var now = new Date(),
-                delay = interval - now % interval;
-            console.log(now);
-            console.log(now%interval);
-            console.log(delay);
-            function start() {
-                // Execute function now...
-                func();
-                // ... and every interval
-                setInterval(func, interval);
-            }
-        
-            // Delay execution until it's an even interval
-            setTimeout(start, delay);
-        }
-        repeatEvery(() => {
-            message.channel.send(time.create().format("H:M:S"));
-        }, 600000);
+        var song = new Song("TestID", "TestTitle", "TestAuthor", 5189);
+        console.log(song);
+        message.reply(song.ID);
+        message.reply(song.author);
+        message.reply(song.title);
+        message.reply(song.length);
+        /*console.log(message.guild.voiceConnection.dispatcher.stream);
+        console.log(message.guild.voiceConnection.dispatcher.time);
+        console.log(message.guild.voiceConnection.dispatcher.totalStreamTime);
+        console.log(message.guild.voiceConnection.dispatcher.volume);*/
     }
 }
 module.exports = TestCommand;
