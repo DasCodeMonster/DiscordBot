@@ -1,4 +1,5 @@
 const commando = require("discord.js-commando");
+const moment = require("moment");
 
 class Permission extends commando.Command {
     constructor(client) {
@@ -43,6 +44,9 @@ class Permission extends commando.Command {
             const role = await roleType.parse(args.group, message);
             console.log(role);
         }
+        //console.log(moment.duration("PT4M13S"));
+        
+        
     }
 }
 module.exports = Permission;

@@ -71,7 +71,19 @@ class List extends commando.Command {
                     //console.log(duration);
                     //duration = duration.splice(/([0-9]+)/);
                     //console.log(duration);
-                    var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, item.contentDetails.duration, message.member.id);
+                    var match = /PT((\d+)H)?((\d+)M)?((\d+)S)?/.exec(item.contentDetails.duration)
+                    var tmp = ""
+                    if (match[2]) {
+                        tmp += match[2] + ":"
+                    }
+                    if (match[4]) {
+                        tmp += match[4] + ":"
+                    }
+                    if (match[6]) {
+                        tmp += match[6]
+                    }
+                    console.log(tmp);
+                    var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, tmp, message.member.id);
                     console.log(song);
                     this.queue.push(song);
                     if(!message.guild.voiceConnection.dispatcher) this.play(message);
@@ -127,7 +139,23 @@ class List extends commando.Command {
                                             //console.log(duration);
                                             //duration = duration.splice(/([0-9]+)/);
                                             //console.log(duration);
-                                            var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, item.contentDetails.duration, message.member.id);
+                                            var match = /PT((\d+)H)?((\d+)M)?((\d+)S)?/.exec(item.contentDetails.duration)
+                                            var tmp = ""
+                                            if (match[2]) {
+                                                tmp += match[2] + ":"
+                                            }
+                                            if (match[4]) {
+                                                tmp += ("00" + match[4]).slice(-2) + ":"
+                                            } else {
+                                                tmp += "00:"
+                                            }
+                                            if (match[6]) {
+                                                tmp += ("00" + match[6]).slice(-2)
+                                            } else {
+                                                tmp += "00"
+                                            }
+                                            console.log(tmp);
+                                            var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, tmp, message.member.id);
                                             console.log(song);
                                             this.queue.push(song);
                                             if(!message.guild.voiceConnection.dispatcher) this.play(message);
