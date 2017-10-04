@@ -33,7 +33,8 @@ class joinVoicechannelCommand extends commando.Command {
     }
     async play(message) {
         if (this.queue.length > 0) {
-            var vid = this.queue.splice(0, 1)[0];
+            //var vid = this.queue.splice(0, 1)[0];
+            var vid = this.queue[0];            
             console.log(vid.ID);
             this.client.provider.set(message.guild, "queue", this.queue);
             this.client.provider.set(message.guild, "nowPlaying", vid);
@@ -50,13 +51,13 @@ class joinVoicechannelCommand extends commando.Command {
         console.log("File ended");
         if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 0) {
             var queue = await this.client.provider.get(message.guild, "queue");
+            var vid = this.queue.splice(0, 1)[0];
             var vid = queue[0];
             console.log(vid);
             message.guild.voiceConnection.playStream(ytdl(vid.ID, {filter: "audioonly"}));
             if (this.client.provider.get(message.guild, "volume")) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
             else message.guild.voiceConnection.dispatcher.setVolume(0.3);
             message.channel.send("Now playing: "+vid.title);
-            queue.splice(0, 1);
             this.client.provider.set(message.guild, "queue", queue);
             this.client.provider.set(message.guild, "nowPlaying", vid);
             message.guild.voiceConnection.dispatcher.on("end", reason => {

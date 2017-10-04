@@ -65,29 +65,7 @@ class List extends commando.Command {
             if (err) console.log(err);
             else {
                 data.items.forEach(item => {
-                    console.log(item);
-                    console.log(item.contentDetails.duration);
-                    //var duration = item.contentDetails.duration.split(/([PYMDTHS]+)/);
-                    //console.log(duration);
-                    //duration = duration.splice(/([0-9]+)/);
-                    //console.log(duration);
-                    var match = /PT((\d+)H)?((\d+)M)?((\d+)S)?/.exec(item.contentDetails.duration)
-                    var tmp = ""
-                    if (match[2]) {
-                        tmp += match[2] + ":"
-                    }
-                    if (match[4]) {
-                        tmp += match[4] + ":"
-                    }
-                    if (match[6]) {
-                        tmp += match[6]
-                    }
-                    console.log(tmp);
-                    var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, tmp, message.member.id);
-                    console.log(song);
-                    this.queue.push(song);
-                    if(!message.guild.voiceConnection.dispatcher) this.play(message);
-                    console.log(this.queue);
+                    this.song(message, args, item);
                 });
             }
         });
@@ -133,33 +111,7 @@ class List extends commando.Command {
                                     if (err) console.log(err);
                                     else {
                                         data.items.forEach(item => {
-                                            console.log(item);
-                                            console.log(item.contentDetails.duration);
-                                            //var duration = item.contentDetails.duration.split(/([PYMDTHS]+)/);
-                                            //console.log(duration);
-                                            //duration = duration.splice(/([0-9]+)/);
-                                            //console.log(duration);
-                                            var match = /PT((\d+)H)?((\d+)M)?((\d+)S)?/.exec(item.contentDetails.duration)
-                                            var tmp = ""
-                                            if (match[2]) {
-                                                tmp += match[2] + ":"
-                                            }
-                                            if (match[4]) {
-                                                tmp += ("00" + match[4]).slice(-2) + ":"
-                                            } else {
-                                                tmp += "00:"
-                                            }
-                                            if (match[6]) {
-                                                tmp += ("00" + match[6]).slice(-2)
-                                            } else {
-                                                tmp += "00"
-                                            }
-                                            console.log(tmp);
-                                            var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, tmp, message.member.id);
-                                            console.log(song);
-                                            this.queue.push(song);
-                                            if(!message.guild.voiceConnection.dispatcher) this.play(message);
-                                            console.log(this.queue);
+                                            this.song(message, args, item);
                                         });
                                     }
                                 });
@@ -200,9 +152,39 @@ class List extends commando.Command {
             }
         });
     }
+    song(message, args, item) {
+        console.log(item);
+        console.log(item.contentDetails.duration);
+        //var duration = item.contentDetails.duration.split(/([PYMDTHS]+)/);
+        //console.log(duration);
+        //duration = duration.splice(/([0-9]+)/);
+        //console.log(duration);
+        var match = /PT((\d+)H)?((\d+)M)?((\d+)S)?/.exec(item.contentDetails.duration)
+        var tmp = ""
+        if (match[2]) {
+            tmp += match[2] + ":"
+        }
+        if (match[4]) {
+            tmp += ("00" + match[4]).slice(-2) + ":"
+        } else {
+            tmp += "00:"
+        }
+        if (match[6]) {
+            tmp += ("00" + match[6]).slice(-2)
+        } else {
+            tmp += "00"
+        }
+        console.log(tmp);
+        var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, tmp, message.member.id);
+        console.log(song);
+        this.queue.push(song);
+        if(!message.guild.voiceConnection.dispatcher) this.play(message);
+        console.log(this.queue);
+    }
     async play(message) {
         if (this.queue.length > 0) {
-            var vid = this.queue.splice(0, 1)[0];
+            //var vid = this.queue.splice(0, 1)[0];
+            var vid = this.queue[0];            
             console.log(vid.ID);
             this.client.provider.set(message.guild, "queue", this.queue);
             this.client.provider.set(message.guild, "nowPlaying", vid);
@@ -219,13 +201,14 @@ class List extends commando.Command {
         console.log("File ended");
         if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 0) {
             var queue = await this.client.provider.get(message.guild, "queue");
+            var vidold = queue.splice(0, 1)[0];
+            console.log(vidold);
             var vid = queue[0];
             console.log(vid);
             message.guild.voiceConnection.playStream(ytdl(vid.ID, {filter: "audioonly"}));
             if (this.client.provider.get(message.guild, "volume")) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
             else message.guild.voiceConnection.dispatcher.setVolume(0.3);
             message.channel.send("Now playing: "+vid.title);
-            queue.splice(0, 1);
             this.client.provider.set(message.guild, "queue", queue);
             this.client.provider.set(message.guild, "nowPlaying", vid);
             message.guild.voiceConnection.dispatcher.on("end", reason => {

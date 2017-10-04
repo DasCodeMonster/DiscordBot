@@ -20,18 +20,20 @@ class Queue extends commando.Command {
             return;
         }
         else {
-            var messageBuilder = "```";
+            var time = message.guild.voiceConnection.dispatcher.time;
+            var seconds = time/1000;
+            var messageBuilder = "";
             await this.queue.some((element, index) => {
-                if (index === 49 || messageBuilder.length >= 1800) {
-                    console.log(this.queue.length);
-                    console.log(index);
-                    console.log(this.queue.length-index)
-                    messageBuilder += `...and ${this.queue.length-index} more!`;
-                    return true;
-                }
+                if (index === 0) messageBuilder += `Now playing: ${element.title} from: ${element.author} | ${(seconds-(seconds%60))/60}:${Math.round(seconds%60)<10?"0"+Math.round(seconds%60):Math.round(seconds%60)}/${element.length}` + "```"
                 else {
-                    messageBuilder += (index+1)+" Title: "+element.title + " Author: "+ element.author + "\n";
-                    return false;
+                    if (index === 49 || messageBuilder.length >= 1800) {
+                        messageBuilder += `...and ${this.queue.length-index} more!`;
+                        return true;
+                    }
+                    else {
+                        messageBuilder += (index+1)+" Title: "+element.title + " | Author: "+ element.author + "\n";
+                        return false;
+                    }
                 }
             });
             messageBuilder += "```";

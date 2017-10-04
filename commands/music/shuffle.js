@@ -12,9 +12,12 @@ class Shuffle extends commando.Command {
         this.queue = [];
     }
     async run(message, args) {
-        if (this.client.provider.get(message.guild, "queue")) {
+        if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 0) {
             this.queue = await this.client.provider.get(message.guild, "queue");
+            var playing = this.queue.splice(0, 1);
+            console.log(playing);
             var newQueue = await this.shuffle(this.queue);
+            newQueue.splice(0, 0, playing[0]);
             this.client.provider.set(message.guild, "queue", newQueue);
             message.reply("shuffled the queue!");
         }

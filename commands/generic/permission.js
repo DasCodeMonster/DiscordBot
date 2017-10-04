@@ -1,5 +1,4 @@
 const commando = require("discord.js-commando");
-const moment = require("moment");
 
 class Permission extends commando.Command {
     constructor(client) {
@@ -19,7 +18,7 @@ class Permission extends commando.Command {
                 key: "option",
                 label: "option",
                 prompt: "you need to provide an option",
-                type: "string"
+                type: "option"
             }, {
                 key: "group",
                 label: "role/user",
@@ -40,9 +39,17 @@ class Permission extends commando.Command {
         if (await userType.validate(args.group, message)) {
             const user = await userType.parse(args.group, message);
             console.log(user);
+            if (user && args.option != "-u") {
+                message.reply("option and argument did not match!");
+                return;
+            }
         } else if (await roleType.validate(args.group, message)) {
             const role = await roleType.parse(args.group, message);
             console.log(role);
+            if (role && args.option != "-r") {
+                message.reply("option and argument did not match!");
+                return;                
+            }
         }
         //console.log(moment.duration("PT4M13S"));
         

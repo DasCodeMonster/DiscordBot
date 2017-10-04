@@ -14,6 +14,9 @@ client.registry.registerGroup("other", "other commands");
 client.registry.registerGroup("points", "Commands related to your points");
 client.registry.registerGroup("generic", "Generic commands");
 client.registry.registerDefaults();
+client.registry.registerType("option");
+//client.registry.registerType("role_or_user");
+client.registry.registerTypesIn(path.join(__dirname, "Types"));
 client.registry.registerCommandsIn(path.join(__dirname, 'commands'));
 client.setProvider(
 	sqlite.open(path.join(__dirname, 'settings.sqlite3')).then(db => new Commando.SQLiteProvider(db))
