@@ -64,18 +64,7 @@ class Play extends commando.Command {
             if (err) console.log(err);
             else {
                 data.items.forEach(item => {
-                    console.log(item);
-                    console.log(item.contentDetails.duration);
-                    //var duration = item.contentDetails.duration.split(/([PYMDTHS]+)/);
-                    //console.log(duration);
-                    //duration = duration.splice(/([0-9]+)/);
-                    //console.log(duration);
-                    var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, item.contentDetails.duration, message.member.id);
-                    console.log(song);
-                    this.queue.splice(0, 0, song);
-                    if(message.guild.voiceConnection.dispatcher) message.guild.voiceConnection.dispatcher.end("!play");
-                    else this.play(message);
-                    console.log(this.queue);
+                    this.song(message, args, item);
                 });
             }
         });
@@ -121,18 +110,9 @@ class Play extends commando.Command {
                                 }, (err, data) => {
                                     if (err) console.log(err);
                                     else {
+                                        //data.items.reverse();
                                         data.items.forEach(item => {
-                                            console.log(item);
-                                            console.log(item.contentDetails.duration);
-                                            //var duration = item.contentDetails.duration.split(/([PYMDTHS]+)/);
-                                            //console.log(duration);
-                                            //duration = duration.splice(/([0-9]+)/);
-                                            //console.log(duration);
-                                            var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, item.contentDetails.duration, message.member.id);
-                                            console.log(song);
-                                            this.queue.push(song);
-                                            if(!message.guild.voiceConnection.dispatcher) this.play(message);
-                                            console.log(this.queue);
+                                            this.song(message, args, item);
                                         });
                                     }
                                 });
@@ -222,6 +202,35 @@ class Play extends commando.Command {
         console.log(response.items[value-1].id.videoId);
         await message.member.voiceChannel.join();
         this.addSingle(message, args, response.items[value-1].id.videoId);
+    }
+    song(message, args, item) {
+        console.log(item);
+        console.log(item.contentDetails.duration);
+        //var duration = item.contentDetails.duration.split(/([PYMDTHS]+)/);
+        //console.log(duration);
+        //duration = duration.splice(/([0-9]+)/);
+        //console.log(duration);
+        var match = /PT((\d+)H)?((\d+)M)?((\d+)S)?/.exec(item.contentDetails.duration)
+        var tmp = ""
+        if (match[2]) {
+            tmp += match[2] + ":"
+        }
+        if (match[4]) {
+            tmp += ("00" + match[4]).slice(-2) + ":"
+        } else {
+            tmp += "00:"
+        }
+        if (match[6]) {
+            tmp += ("00" + match[6]).slice(-2)
+        } else {
+            tmp += "00"
+        }
+        console.log(tmp);
+        var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, tmp, message.member.id);
+        console.log(song);
+        this.queue.splice(0,0,item);
+        if(!message.guild.voiceConnection.dispatcher) this.play(message);
+        console.log(this.queue);
     }
     async play(message) {
         if (this.queue.length > 0) {

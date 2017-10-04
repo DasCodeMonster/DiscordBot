@@ -14,15 +14,23 @@ class Queue extends commando.Command {
         this.queue = [];
     }
     async run(message, args){
+        //await this.client.provider.set(message.guild, "queue", this.queue);
         if (this.client.provider.get(message.guild, "queue")) this.queue = await this.client.provider.get(message.guild, "queue");
-        if (this.queue.length == 0) {
+        if (this.queue.length === 0) {
             message.reply("The queue is empty!");
             return;
         }
+        if (this.queue.length === 1) {
+            message.reply(`Now playing: ${element.title} from: ${element.author} | ${(seconds-(seconds%60))/60}:${Math.round(seconds%60)<10?"0"+Math.round(seconds%60):Math.round(seconds%60)}/${element.length}`);
+            return;
+        }
         else {
-            var time = message.guild.voiceConnection.dispatcher.time;
-            var seconds = time/1000;
-            var messageBuilder = "";
+            if (message.guild.voiceConnection && message.guild.voiceConnection.dispatcher) {
+                var time = message.guild.voiceConnection.dispatcher.time;
+                var seconds = time/1000;
+                var messageBuilder = "";
+            }
+            else var seconds = 0;
             await this.queue.some((element, index) => {
                 if (index === 0) messageBuilder += `Now playing: ${element.title} from: ${element.author} | ${(seconds-(seconds%60))/60}:${Math.round(seconds%60)<10?"0"+Math.round(seconds%60):Math.round(seconds%60)}/${element.length}` + "```"
                 else {

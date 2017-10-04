@@ -10,12 +10,13 @@ class QueueRemove extends commando.Command {
             guildOnly: true
         });
         this.queue = [];
+        this.newQueue = [];
     }
     async run(message, args) {
-        //this.queue = this.client.provider.get(message.guild, "queue");
-        await this.client.provider.remove(message.guild, "queue");
-        console.log(this.client.provider.get(message.guild, "queue"));
-        await this.client.provider.set(message.guild, "queue", this.queue);
+        if (this.client.provider.get(message.guild, "queue")) this.queue = this.client.provider.get(message.guild, "queue");
+        //await this.client.provider.remove(message.guild, "queue");
+        if (this.queue.length > 0) this.newQueue = this.queue.splice(0,1);
+        await this.client.provider.set(message.guild, "queue", this.newQueue);
         console.log(this.client.provider.get(message.guild, "queue"));
     }
 }

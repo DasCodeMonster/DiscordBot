@@ -5,6 +5,7 @@ const keys = require('./../../Token&Keys');
 const google = require('googleapis');
 const youtubeV3 = google.youtube({version: "v3", auth: keys.YoutubeAPIKey});
 const Song = require("./Song");
+const curl = require("curl");
 
 class TestCommand extends commando.Command {
     constructor(client) {
@@ -13,22 +14,25 @@ class TestCommand extends commando.Command {
             group: 'other',
             memberName: 'test',
             description: 'Just a testcommand',
-            guildOnly: false    
+            guildOnly: false,
+            args: [{
+                key: "name",
+                label: "name",
+                prompt: "give name?",
+                type: "string"
+            }]  
         });
         this.queue = [];
         this.speaking;
     }
     async run(message, args) {
-        var song = new Song("TestID", "TestTitle", "TestAuthor", 5189);
-        console.log(song);
-        message.reply(song.ID);
-        message.reply(song.author);
-        message.reply(song.title);
-        message.reply(song.length);
-        /*console.log(message.guild.voiceConnection.dispatcher.stream);
-        console.log(message.guild.voiceConnection.dispatcher.time);
-        console.log(message.guild.voiceConnection.dispatcher.totalStreamTime);
-        console.log(message.guild.voiceConnection.dispatcher.volume);*/
+        if (args.name.match(/[A-Za-z0-9\\p{L} _\\.]+$/)){
+            /*curl.get(`https://euw1.api.riotgames.com/lol/match/v3/matchlists/by-account/${args.name}/recent?api_key=${keys.riotAPI}`, (err, data) => {
+                if (err) console.log(err);
+                else console.log(data);
+            });*/
+        }
+        else console.log("not valid");
     }
 }
 module.exports = TestCommand;
