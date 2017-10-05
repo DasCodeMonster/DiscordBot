@@ -35,7 +35,6 @@ class joinVoicechannelCommand extends commando.Command {
         if (this.queue.length > 0) {
             //var vid = this.queue.splice(0, 1)[0];
             var vid = this.queue[0];            
-            console.log(vid.ID);
             this.client.provider.set(message.guild, "queue", this.queue);
             this.client.provider.set(message.guild, "nowPlaying", vid);
             message.guild.voiceConnection.playStream(ytdl(vid.ID, {filter: "audioonly"}));
@@ -49,9 +48,9 @@ class joinVoicechannelCommand extends commando.Command {
     }
     async onEnd(message) {
         console.log("File ended");
-        if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 0) {
+        if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 1) {
             var queue = await this.client.provider.get(message.guild, "queue");
-            var vid = this.queue.splice(0, 1)[0];
+            var vid = queue.splice(0, 1)[0];
             var vid = queue[0];
             console.log(vid);
             message.guild.voiceConnection.playStream(ytdl(vid.ID, {filter: "audioonly"}));
@@ -66,6 +65,8 @@ class joinVoicechannelCommand extends commando.Command {
             });
         }
         else {
+            var empty = [];
+            this.client.provider.set(message.guild, "queue", empty);
             console.log("queue is empty");
             return;
         }

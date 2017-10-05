@@ -88,7 +88,7 @@ class Play extends commando.Command {
                 }
                 var firstPage = [];
                 data.items.forEach((item) => {
-                    console.log(item);
+                    //console.log(item);
                     if (item.snippet.resourceId.videoId) {
                         firstPage.push(item.snippet.resourceId.videoId);
                     }
@@ -104,9 +104,11 @@ class Play extends commando.Command {
                             console.log("playlist fetched");
                             console.log(this.IDs);
                             this.IDs.forEach(page => {
+                                console.log(page[0]);
+                                return;
                                 youtubeV3.videos.list({
                                     part: "snippet, contentDetails",
-                                    id: this.IDs[0].join(", ")
+                                    id: page.join(", ")
                                 }, (err, data) => {
                                     if (err) console.log(err);
                                     else {
@@ -135,7 +137,6 @@ class Play extends commando.Command {
                 return;
             }
             else{
-                console.log("test");
                 var page = [];
                 nextPageResults.items.forEach((item) => {
                     if (item.snippet.resourceId.videoId) {
@@ -144,6 +145,7 @@ class Play extends commando.Command {
                 });
                 console.log(page.length);
                 this.IDs.push(page);
+                page = [];
             }
             if (nextPageResults.nextPageToken){
                 this.fetchAllPages(listId, nextPageResults.nextPageToken, callback);
@@ -252,7 +254,7 @@ class Play extends commando.Command {
         console.log("File ended");
         if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 0) {
             var queue = await this.client.provider.get(message.guild, "queue");
-            var vid = this.queue.splice(0, 1)[0];
+            var vid = queue.splice(0, 1)[0];
             var vid = queue[0];
             console.log(vid);
             message.guild.voiceConnection.playStream(ytdl(vid.ID, {filter: "audioonly"}));

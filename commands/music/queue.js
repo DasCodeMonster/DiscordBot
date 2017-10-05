@@ -20,10 +20,6 @@ class Queue extends commando.Command {
             message.reply("The queue is empty!");
             return;
         }
-        if (this.queue.length === 1) {
-            message.reply(`Now playing: ${element.title} from: ${element.author} | ${(seconds-(seconds%60))/60}:${Math.round(seconds%60)<10?"0"+Math.round(seconds%60):Math.round(seconds%60)}/${element.length}`);
-            return;
-        }
         else {
             if (message.guild.voiceConnection && message.guild.voiceConnection.dispatcher) {
                 var time = message.guild.voiceConnection.dispatcher.time;
@@ -31,6 +27,11 @@ class Queue extends commando.Command {
                 var messageBuilder = "";
             }
             else var seconds = 0;
+            if (this.queue.length === 1) {
+                var element = this.queue[0];
+                message.reply(`Now playing: ${element.title} from: ${element.author} | ${(seconds-(seconds%60))/60}:${Math.round(seconds%60)<10?"0"+Math.round(seconds%60):Math.round(seconds%60)}/${element.length}`);
+                return;
+            }
             await this.queue.some((element, index) => {
                 if (index === 0) messageBuilder += `Now playing: ${element.title} from: ${element.author} | ${(seconds-(seconds%60))/60}:${Math.round(seconds%60)<10?"0"+Math.round(seconds%60):Math.round(seconds%60)}/${element.length}` + "```"
                 else {
