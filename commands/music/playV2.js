@@ -66,6 +66,7 @@ class Play extends commando.Command {
                 data.items.forEach(item => {
                     this.song(message, args, item);
                 });
+                if(!message.guild.voiceConnection.dispatcher) this.play(message);                
             }
         });
     }
@@ -103,9 +104,9 @@ class Play extends commando.Command {
                         else {
                             console.log("playlist fetched");
                             console.log(this.IDs);
+                            this.IDs.reverse();
                             this.IDs.forEach(page => {
-                                console.log(page[0]);
-                                return;
+                                page.reverse();
                                 youtubeV3.videos.list({
                                     part: "snippet, contentDetails",
                                     id: page.join(", ")
@@ -113,9 +114,15 @@ class Play extends commando.Command {
                                     if (err) console.log(err);
                                     else {
                                         //data.items.reverse();
+                                        console.log(data);
+                                        console.log("fertig");
                                         data.items.forEach(item => {
                                             this.song(message, args, item);
                                         });
+                                        console.log(page);
+                                        console.log(this.IDs[this.IDs.length-1]);
+                                        console.log(this.IDs[this.IDs.length-1] == page);
+                                        if(!message.guild.voiceConnection.dispatcher && page == this.IDs[this.IDs.length-1]) this.play(message);                                        
                                     }
                                 });
                             });
@@ -208,10 +215,6 @@ class Play extends commando.Command {
     song(message, args, item) {
         console.log(item);
         console.log(item.contentDetails.duration);
-        //var duration = item.contentDetails.duration.split(/([PYMDTHS]+)/);
-        //console.log(duration);
-        //duration = duration.splice(/([0-9]+)/);
-        //console.log(duration);
         var match = /PT((\d+)H)?((\d+)M)?((\d+)S)?/.exec(item.contentDetails.duration)
         var tmp = ""
         if (match[2]) {
@@ -230,9 +233,9 @@ class Play extends commando.Command {
         console.log(tmp);
         var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, tmp, message.member.id);
         console.log(song);
-        this.queue.splice(0,0,item);
-        if(!message.guild.voiceConnection.dispatcher) this.play(message);
+        this.queue.splice(0,0,song);
         console.log(this.queue);
+        console.log(this.queue.length);
     }
     async play(message) {
         if (this.queue.length > 0) {
