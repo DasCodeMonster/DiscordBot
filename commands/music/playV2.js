@@ -65,7 +65,12 @@ class Play extends commando.Command {
             if (err) console.log(err);
             else {
                 data.items.forEach(item => {
-                    this.queue.splice(1,0,this.song(message, args, item));
+                    if (this.queue.length>1){
+                        this.queue.splice(1,0,this.song(message, args, item));
+                    }
+                    else {
+                        this.queue.push(this.song(message, args, item));                        
+                    }
                 });
                 if(message.guild.voiceConnection.dispatcher) message.guild.voiceConnection.dispatcher.end("!play");
                 else this.play(message);                
@@ -228,7 +233,7 @@ class Play extends commando.Command {
                 console.log(data);
                 var messageBuilder = "you searched for:" + args.link + "\n```"
                 data.items.forEach((item, index) => {
-                    messageBuilder += `${index+1} ${item.snippet.title}\n`;
+                    messageBuilder += `${index+1} Title: ${item.snippet.title} Channel:${item.snippet.channelTitle}\n`;
                 });
                 messageBuilder += "```"
                 console.log(messageBuilder);
@@ -237,7 +242,6 @@ class Play extends commando.Command {
         });
     }
     async waitForMessage(message, args, oneLiner, response) {
-        console.log(oneLiner);
         var commandmsg = await message.reply("type the number of the song to play:\n"+oneLiner+"Respond with ``cancel`` to cancel the command.\n"+
             "The command will automatically be cancelled in 30 seconds, unless you respond.");
         const responses = await message.channel.awaitMessages(msg2 => {
@@ -256,7 +260,6 @@ class Play extends commando.Command {
             commandmsg.delete();
             return null;
         }
-        message
         commandmsg.delete();
         console.log(value);
         console.log(response.items[value-1].id.videoId);
@@ -264,12 +267,6 @@ class Play extends commando.Command {
         this.addSingle(message, args, response.items[value-1].id.videoId);
     }
     song(message, args, item) {
-        //console.log(item);
-        //console.log(item.contentDetails.duration);
-        //var duration = item.contentDetails.duration.split(/([PYMDTHS]+)/);
-        //console.log(duration);
-        //duration = duration.splice(/([0-9]+)/);
-        //console.log(duration);
         var match = /PT((\d+)H)?((\d+)M)?((\d+)S)?/.exec(item.contentDetails.duration)
         var tmp = ""
         if (match[2]) {

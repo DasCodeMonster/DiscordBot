@@ -26,9 +26,13 @@ class SongInfo extends commando.Command {
         this.queue = [];
     }
     async run(message, args) {
-        if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 1) this.queue = await this.client.provider.get(message.guild, "queue");
+        if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 0) this.queue = await this.client.provider.get(message.guild, "queue");
         console.log(args.number);
-        if (args.number > this.queue.length) return;
+        console.log(this.queue.length);
+        console.log(args.number > this.queue.length-1);
+        console.log(this.queue);
+        if (args.number > this.queue.length-1) return;
+        console.log(this.queue[0]);
         console.log(this.queue[args.number]);
         console.log(message.guild.member(this.queue[args.number].queuedBy).user.toString());
         youtubeV3.videos.list({

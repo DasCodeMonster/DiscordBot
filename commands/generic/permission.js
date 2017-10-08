@@ -23,7 +23,7 @@ class Permission extends commando.Command {
                 key: "group",
                 label: "role/user",
                 prompt: "you need to mention a role or user",
-                type: "string"
+                type: "role_or_user_or_channel"
             }, {
                 key: "boolean",
                 label: "boolean",
@@ -34,25 +34,6 @@ class Permission extends commando.Command {
     }
     async run(message, args) {
         console.log(args);
-        const userType = this.client.registry.types.get('user');
-        const roleType = this.client.registry.types.get('role');
-        if (await userType.validate(args.group, message)) {
-            const user = await userType.parse(args.group, message);
-            console.log(user);
-            if (user && args.option != "-u") {
-                message.reply("option and argument did not match!");
-                return;
-            }
-        } else if (await roleType.validate(args.group, message)) {
-            const role = await roleType.parse(args.group, message);
-            console.log(role);
-            if (role && args.option != "-r") {
-                message.reply("option and argument did not match!");
-                return;                
-            }
-        }
-        //console.log(moment.duration("PT4M13S"));
-        
         
     }
 }
