@@ -84,7 +84,8 @@ class Play extends commando.Command {
         }, (err, data) => {
             if (err) {
                 console.log(err);
-                message.reply("this is not a valid link");
+                this.search(message, args);
+                //message.reply("this is not a valid link");
                 return;
             }
             else {

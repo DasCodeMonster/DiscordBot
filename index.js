@@ -131,6 +131,9 @@ client.on("message", async message => {
         console.log(reason);
 
     });*/
+    /*console.log(message.guild.member("221047590681051152"));
+    message.reply(message.guild.member("221047590681051152"));
+    message.member.*/
     
 });
 client.on("messageDelete", async message => {
@@ -190,12 +193,12 @@ console.log("bot is logged in");
 
 process.once('SIGINT', () => {
     console.log("exiting now");
-    client.guilds.array().forEach(guild => {
-        console.log(client.provider.get(guild, "queue"));
+    /*client.guilds.array().forEach(guild => {
+        //console.log(client.provider.get(guild, "queue"));
         client.provider.remove(guild, "queue");
         console.log(guild.name);
         console.log(client.provider.get(guild, "queue"));
-    });
+    });*/
     client.provider.db.close();
     client.destroy();
     process.exit(0);

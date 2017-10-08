@@ -1,5 +1,6 @@
 {
     "BotToken": "",
     "YoutubeAPIKey": "",
-    "OwnerID": ""
+    "OwnerID": "",
+    "riotAPI": ""
 }

@@ -253,7 +253,7 @@ class List extends commando.Command {
             else message.guild.voiceConnection.dispatcher.setVolume(0.3);
             message.channel.send("Now playing: "+vid.title);
             message.guild.voiceConnection.dispatcher.on("end", reason => {
-                //this.onEnd(message);
+                this.onEnd(message);
             });
         }
     }
