@@ -22,6 +22,7 @@ class Play extends commando.Command {
         });
         this.queue = [];
         this.IDs = [];
+        this.pages = 0;
     }
     async run(message, args) {
         var queue = await this.client.provider.get(message.guild, "queue");
@@ -64,14 +65,17 @@ class Play extends commando.Command {
             if (err) console.log(err);
             else {
                 data.items.forEach(item => {
-                    this.song(message, args, item);
+                    this.queue.splice(1,0,this.song(message, args, item));
                 });
-                if(!message.guild.voiceConnection.dispatcher) this.play(message);                
+                if(message.guild.voiceConnection.dispatcher) message.guild.voiceConnection.dispatcher.end("!play");
+                else this.play(message);                
             }
         });
     }
     async addPlaylist(message, args, ID) {
         //var listId = args.link.split("list=")[1];
+        var i = 0;        
+        var Data = [];
         console.log(ID);
         await youtubeV3.playlistItems.list({
             part: "snippet",
@@ -80,55 +84,98 @@ class Play extends commando.Command {
         }, (err, data) => {
             if (err) {
                 console.log(err);
-                //message.reply("this is not a valid link");
-                this.search(message, args);
+                message.reply("this is not a valid link");
+                return;
             }
             else {
                 if (!message.guild.voiceConnection){
                     message.member.voiceChannel.join();
                 }
+                console.log(data);
                 var firstPage = [];
-                data.items.forEach((item) => {
-                    //console.log(item);
-                    if (item.snippet.resourceId.videoId) {
+                data.items.forEach((item, index) => {
+                    console.log(item);
+                    if (item.snippet.resourceId.videoId && ytdl.validateId(item.snippet.resourceId.videoId)) {
                         firstPage.push(item.snippet.resourceId.videoId);
                     }
-                });
-                console.log(firstPage.length);
-                this.IDs.push(firstPage);
-                if (data.nextPageToken) {
-                    this.fetchAllPages(ID, data.nextPageToken, err => {
-                        if (err) {
-                            console.log(err);
-                        }
-                        else {
-                            console.log("playlist fetched");
-                            console.log(this.IDs);
-                            this.IDs.reverse();
-                            this.IDs.forEach(page => {
-                                page.reverse();
-                                youtubeV3.videos.list({
-                                    part: "snippet, contentDetails",
-                                    id: page.join(", ")
-                                }, (err, data) => {
-                                    if (err) console.log(err);
-                                    else {
-                                        //data.items.reverse();
-                                        console.log(data);
-                                        console.log("fertig");
-                                        data.items.forEach(item => {
-                                            this.song(message, args, item);
+                    if (index === data.items.length-1) {
+                        console.log(firstPage.length);
+                        this.IDs.push(firstPage);
+                        this.pages +=1;
+                        if (data.nextPageToken) {
+                            this.fetchAllPages(ID, data.nextPageToken, err => {
+                                if (err) {
+                                    console.log(err);
+                                }
+                                else {
+                                    console.log("playlist fetched");
+                                    console.log(this.IDs);
+                                    //this.IDs.reverse();
+                                    this.IDs.forEach((page, index) => {
+                                        youtubeV3.videos.list({
+                                            part: "snippet, contentDetails",
+                                            id: page.join(", ")
+                                        }, (err, data) => {
+                                            if (err) console.log(err);
+                                            else {
+                                                console.log(`\n${index}\n${page}\n${page.length}\n`);
+                                                var songs = [];
+                                                data.items.forEach(item => {
+                                                    songs.push(this.song(message, args, item));
+                                                });
+                                                Data.splice(index,0,songs);
+                                                i+=1;
+                                                console.log(i);
+                                                console.log(this.pages);
+                                                console.log(i === this.pages);
+                                                console.log(i == this.pages);
+                                                if (i === this.pages) {
+                                                    console.log("ok");
+                                                    Data.reverse();
+                                                    Data.forEach((songs, index) => {
+                                                        songs.reverse();
+                                                        songs.forEach((song, index) => {
+                                                            this.queue.splice(1,0,song);
+                                                        });
+                                                    });
+                                                    console.log(this.queue);
+                                                    if (message.guild.voiceConnection.dispatcher) message.guild.voiceConnection.dispatcher.end("!play");
+                                                    else this.play(message);
+                                                }
+                                            }
                                         });
-                                        console.log(page);
-                                        console.log(this.IDs[this.IDs.length-1]);
-                                        console.log(this.IDs[this.IDs.length-1] == page);
-                                        if(!message.guild.voiceConnection.dispatcher && page == this.IDs[this.IDs.length-1]) this.play(message);                                        
-                                    }
-                                });
+                                    });
+                                }
                             });
                         }
-                    });
-                }
+                        else {
+                            console.log(firstPage);
+                            firstPage.reverse();
+                            youtubeV3.videos.list({
+                                part: "snippet, contentDetails",
+                                id: firstPage.join(", ")
+                            }, (err, data) => {
+                                if (err) console.log(err);
+                                else {
+                                    var songs = [];
+                                    data.items.forEach(item => {
+                                        songs.push(this.song(message, args, item));
+                                    });
+                                    i+=1;
+                                    if (i === this.pages) {
+                                        songs.forEach((song, index) => {
+                                            console.log(song);
+                                            this.queue.splice(1,0,song);
+                                        });
+                                        console.log(this.queue);
+                                        if(message.guild.voiceConnection.dispatcher) message.guild.voiceConnection.dispatcher.end("!play");
+                                        else this.play(message);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
             }
         });
     }
@@ -144,21 +191,24 @@ class Play extends commando.Command {
                 return;
             }
             else{
+                console.log("test");
                 var page = [];
-                nextPageResults.items.forEach((item) => {
+                nextPageResults.items.forEach((item, index) => {
                     if (item.snippet.resourceId.videoId) {
                         page.push(item.snippet.resourceId.videoId);
                     }
+                    if (index === nextPageResults.items.length-1) {
+                        console.log(page.length);
+                        this.IDs.push(page);
+                        this.pages += 1;
+                        if (nextPageResults.nextPageToken){
+                            this.fetchAllPages(listId, nextPageResults.nextPageToken, callback);
+                        }
+                        else{
+                            callback(null);
+                        }
+                    }
                 });
-                console.log(page.length);
-                this.IDs.push(page);
-                page = [];
-            }
-            if (nextPageResults.nextPageToken){
-                this.fetchAllPages(listId, nextPageResults.nextPageToken, callback);
-            }
-            else{
-                callback(null);
             }
         });
     }
@@ -213,8 +263,12 @@ class Play extends commando.Command {
         this.addSingle(message, args, response.items[value-1].id.videoId);
     }
     song(message, args, item) {
-        console.log(item);
-        console.log(item.contentDetails.duration);
+        //console.log(item);
+        //console.log(item.contentDetails.duration);
+        //var duration = item.contentDetails.duration.split(/([PYMDTHS]+)/);
+        //console.log(duration);
+        //duration = duration.splice(/([0-9]+)/);
+        //console.log(duration);
         var match = /PT((\d+)H)?((\d+)M)?((\d+)S)?/.exec(item.contentDetails.duration)
         var tmp = ""
         if (match[2]) {
@@ -230,12 +284,13 @@ class Play extends commando.Command {
         } else {
             tmp += "00"
         }
-        console.log(tmp);
+        //console.log(tmp);
         var song = new Song(item.id, item.snippet.title, item.snippet.channelTitle, tmp, message.member.id);
-        console.log(song);
-        this.queue.splice(0,0,song);
-        console.log(this.queue);
-        console.log(this.queue.length);
+        //console.log(song);
+        //this.queue.push(song);
+        //if(!message.guild.voiceConnection.dispatcher) this.play(message);
+        //console.log(this.queue);
+        return song;
     }
     async play(message) {
         if (this.queue.length > 0) {
@@ -255,9 +310,9 @@ class Play extends commando.Command {
     }
     async onEnd(message) {
         console.log("File ended");
-        if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 0) {
+        if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 1) {
             var queue = await this.client.provider.get(message.guild, "queue");
-            var vid = queue.splice(0, 1)[0];
+            var vidold = queue.splice(0, 1)[0];
             var vid = queue[0];
             console.log(vid);
             message.guild.voiceConnection.playStream(ytdl(vid.ID, {filter: "audioonly"}));
@@ -272,6 +327,8 @@ class Play extends commando.Command {
             });
         }
         else {
+            var empty = [];
+            this.client.provider.set(message.guild, "queue", empty);
             console.log("queue is empty");
             return;
         }

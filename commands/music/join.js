@@ -19,7 +19,7 @@ class joinVoicechannelCommand extends commando.Command {
             message.member.voiceChannel.join();
             console.log("Guild: "+message.guild.name+", joined voicechannel: "+message.member.voiceChannel.name);
             message.reply("ok i joined voicechannel: " + message.member.voiceChannel.name);
-            if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 0){
+                if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 0){
                 this.queue = await this.client.provider.get(message.guild, "queue");
                 this.play(message);
             }
@@ -50,7 +50,7 @@ class joinVoicechannelCommand extends commando.Command {
         console.log("File ended");
         if (this.client.provider.get(message.guild, "queue") && this.client.provider.get(message.guild, "queue").length > 1) {
             var queue = await this.client.provider.get(message.guild, "queue");
-            var vid = queue.splice(0, 1)[0];
+            var vidold = queue.splice(0, 1)[0];
             var vid = queue[0];
             console.log(vid);
             message.guild.voiceConnection.playStream(ytdl(vid.ID, {filter: "audioonly"}));
