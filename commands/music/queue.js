@@ -40,7 +40,7 @@ class Queue extends commando.Command {
                         return true;
                     }
                     else {
-                        messageBuilder += (index)+" Title: "+element.title + " | Author: "+ element.author + "\n";
+                        messageBuilder += (index)+" Title: "+element.title + " | Channel: "+ element.author + "\n";
                         return false;
                     }
                 }

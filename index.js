@@ -17,6 +17,8 @@ client.registry.registerDefaults();
 client.registry.registerType("option");
 client.registry.registerType("role_or_user_or_channel");
 client.registry.registerType("commandtype");
+client.registry.registerType("song_or_list");
+client.registry.registerType("optionalbool");
 client.registry.registerTypesIn(path.join(__dirname, "Types"));
 client.registry.registerCommandsIn(path.join(__dirname, 'commands'));
 client.setProvider(
@@ -135,7 +137,7 @@ client.on("message", async message => {
     /*console.log(message.guild.member("221047590681051152"));
     message.reply(message.guild.member("221047590681051152"));
     message.member.*/
-
+    
 });
 client.on("messageDelete", async message => {
     
