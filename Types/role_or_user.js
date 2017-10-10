@@ -7,9 +7,6 @@ class RoleOrUserOrChannel extends ArgumentType {
         super(client, "role_or_user_or_channel");
     }
     validate(value, msg) {
-        console.log(this.userValidate(value, msg));
-        console.log(this.channelValidate(value, msg));
-        console.log(this.roleValidate(value, msg));
         if (this.userValidate(value, msg)) return true;
         else if (this.channelValidate(value, msg)) return true;
         else if (this.roleValidate(value, msg)) return true;

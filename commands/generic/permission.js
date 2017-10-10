@@ -13,7 +13,7 @@ class Permission extends commando.Command {
                 key: "commands",
                 label: "commands",
                 prompt: "PLACEHOLDER",
-                type: "string"
+                type: "commandtype"
             }, {
                 key: "option",
                 label: "option",
@@ -33,7 +33,7 @@ class Permission extends commando.Command {
         });
     }
     async run(message, args) {
-        console.log(args);
+        //console.log(args);
         
     }
 }

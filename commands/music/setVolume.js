@@ -17,7 +17,9 @@ class SetVolumeCommand extends commando.Command {
                 prompt: "Set the volume to a number between 0 and 100.",
                 type: "integer",
                 min: 0,
-                max: 100
+                max: 100,
+                default: -1,
+                infinte: false
             }],
             argsCount: 1
         })
@@ -25,14 +27,19 @@ class SetVolumeCommand extends commando.Command {
 
     async run(message, args) {
         console.log("User: "+message.member.displayName+" in Guild: "+message.guild.name+" used Command: "+this.name+" in textchannel: "+message.channel.name);  
-
-        if (message.guild.voiceConnection) {
+        if (args.number === -1) {
+            message.reply(`current volume: ${this.client.provider.get(message.guild, "volume", 0.3)*100}`);
+            return;
+        }
+        if (message.guild.voiceConnection && message.guild.voiceConnection.dispatcher) {
             message.guild.voiceConnection.dispatcher.setVolume(args.number/100);
             console.log(args.number/100);
             this.client.provider.set(message.guild, "volume", args.number/100);
+            message.reply(`set the volume to ${args.number/100}.`);
         }
         else {
-            message.reply("I need to play a song first.");
+            this.client.provider.set(message.guild, "volume", args.number/100);
+            message.reply(`set the volume to ${args.number}.`);
         }
     }
 }

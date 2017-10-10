@@ -33,8 +33,8 @@ class List extends commando.Command {
         }
         else {
             if (message.member.voiceChannel) {
-                console.log(await ytdl.validateId(args.link));
-                if (await ytdl.validateId(args.link)) {
+                console.log(await ytdl.validateURL(args.link));
+                if (await ytdl.validateURL(args.link)) {
                     message.member.voiceChannel.join();
                     await this.validation(message, args);
                 }
@@ -50,7 +50,7 @@ class List extends commando.Command {
     async validation(message, args) {
         var ID = args.link.split(/([v=&])+/)[2];
         console.log(ID);
-        if(ytdl.validateId(ID)) {
+        if(ytdl.validateURL(ID)) {
             this.addSingle(message, args, ID);
         }
         else {
@@ -95,7 +95,7 @@ class List extends commando.Command {
                 var firstPage = [];
                 data.items.forEach((item, index) => {
                     console.log(item);
-                    if (item.snippet.resourceId.videoId && ytdl.validateId(item.snippet.resourceId.videoId)) {
+                    if (item.snippet.resourceId.videoId) {
                         firstPage.push(item.snippet.resourceId.videoId);
                     }
                     if (index === data.items.length-1) {
