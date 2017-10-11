@@ -35,7 +35,7 @@ class SetVolumeCommand extends commando.Command {
             message.guild.voiceConnection.dispatcher.setVolume(args.number/100);
             console.log(args.number/100);
             this.client.provider.set(message.guild, "volume", args.number/100);
-            message.reply(`set the volume to ${args.number/100}.`);
+            message.reply(`set the volume to ${args.number}.`);
         }
         else {
             this.client.provider.set(message.guild, "volume", args.number/100);

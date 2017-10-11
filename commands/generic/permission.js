@@ -10,11 +10,21 @@ class Permission extends commando.Command {
             description: "you can decide which users can use which commands.",
             guildOnly: true,
             args:[{
-                key: "commands",
-                label: "commands",
-                prompt: "PLACEHOLDER",
-                type: "commandtype"
+                key: "command",
+                label: "command",
+                prompt: "you need to provide an command",
+                type: "command"
+            }, /*{
+                key: "commandgroup",
+                label: "commandgroup",
+                prompt: "you need to give an commandgroup",
+                type: "commandgroup"
             }, {
+                key: "commandname",
+                label: "commandname",
+                prompt: "PLACEHOLDER",
+                type: "commandname"
+            },*/ {
                 key: "option",
                 label: "option",
                 prompt: "you need to provide an option",
@@ -29,7 +39,9 @@ class Permission extends commando.Command {
                 label: "boolean",
                 prompt:"true or false?",
                 type: "boolean"
-            }]
+            }],
+            guarded: true
+            //argsSingleQuotes: true
         });
     }
     async run(message, args) {

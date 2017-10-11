@@ -16,9 +16,11 @@ client.registry.registerGroup("generic", "Generic commands");
 client.registry.registerDefaults();
 client.registry.registerType("option");
 client.registry.registerType("role_or_user_or_channel");
-client.registry.registerType("commandtype");
+client.registry.registerType("commandname");
 client.registry.registerType("song_or_list");
 client.registry.registerType("optionalbool");
+client.registry.registerType("commandgroup");
+client.registry.registerType("command");
 client.registry.registerTypesIn(path.join(__dirname, "Types"));
 client.registry.registerCommandsIn(path.join(__dirname, 'commands'));
 client.setProvider(
