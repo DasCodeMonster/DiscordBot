@@ -13,9 +13,27 @@ class RoleOrUserOrChannel extends ArgumentType {
         else return false;
     }
     parse(value, msg) {
-        if (this.userValidate(value, msg)) return this.userParse(value, msg);
-        else if (this.channelValidate(value, msg)) return this.channelParse(value, msg);
-        else if (this.roleValidate(value, msg)) return this.roleParse(value, msg);
+		if (this.userValidate(value, msg)) {
+			var returnUser = {
+				"type": "user",
+				"value": this.userParse(value, msg)
+			}
+			return returnUser;
+		}
+        else if (this.channelValidate(value, msg)) {
+			var returnChannel = {
+				"type": "channel",
+				"value": this.channelParse(value, msg)
+			}
+			return returnChannel;
+		}
+        else if (this.roleValidate(value, msg)) {
+			var returnRole = {
+				"type:": "role",
+				"value": this.roleParse(value, msg)
+			}
+			return returnRole;
+		}
     }
     userValidate(value, msg) {
         const matches = value.match(/^(?:<@!?)?([0-9]+)>?$/);

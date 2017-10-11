@@ -5,47 +5,46 @@ class CommandArgument extends ArgumentType {
         super(client, "command");
     }
     validate(value, msg) {
-        console.log(value);
         if (value.split(":").length === 2 &&value.split(":")[0] !== value && value.split(":")[1] !== value) {
             var group = value.split(":")[0];
-            var command = value.split(":")[1]
-            console.log(group);
-            console.log(command);
-            console.log(this.validateGroup(group, msg));
-            console.log(this.validateCommandname(command, msg));            
-            if (this.validateGroup(group, msg) && this.validateCommand(command, msg)) return true;
+            var commandname = value.split(":")[1]
+            if (group === "*" && commandname !== "*") return false;
+            if (group === "*" && commandname === "*") return true;
+            if (this.validateGroup(group, msg) && commandname === "*") return true;
+            if ((this.validateGroup(group, msg) || group === "*") && (this.validateCommandname(commandname, msg) || commandname === "*")) {
+                return this.validateCommand(group, commandname);
+            }
             else return false;
         }
-        //return true;
+        return false;
     }
     parse(value, msg) {
-        return value;
+        if (this.validate(value, msg)) return value;
+        else throw new Error("invalid command please validate fist!");
     }
-    validateCommand(value, msg) {
-        
+    validateCommand(groupid, commandname) {
+        return this.client.registry.groups.some(group => {
+            if (group.id === groupid) {
+                return group.commands.some(command => {
+                    if (command.name === commandname) return true;
+                });
+            }
+        });
     }
     validateGroup(value, msg) {
-        //console.log(this.client.registry.groups);
         return this.client.registry.groups.some(group => {
-            //console.log(group);
             if (group.id === value) return true;
-            //else return false;  
         });
-        //return true;
     }
     parseGroup(value, msg) {
         return value;
     }
     validateCommandname(value, msg) {
-        //console.log(this.client.registry.groups);
-        //console.log(this.client.registry.commands);
         return this.client.registry.commands.some(command => {
-            //console.log(command.name);
             if (command.name === value) return true;
-            //else return false;  
         });
     }
-    parseCommand(value, msg) {
+    parseCommandname(value, msg) {
         var Command;
         var isCommand = this.client.registry.commands.some(command => {
             if (command.name === value) {
@@ -53,8 +52,6 @@ class CommandArgument extends ArgumentType {
                 return true;
             }
         });
-        //console.log(isCommand);
-        //console.log(Command);
         if (isCommand == true) return Command;
     }
 }

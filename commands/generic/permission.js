@@ -45,7 +45,7 @@ class Permission extends commando.Command {
         });
     }
     async run(message, args) {
-        //console.log(args);
+        console.log(args);
         
     }
 }
