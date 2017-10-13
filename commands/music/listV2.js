@@ -249,7 +249,7 @@ class List extends commando.Command {
             this.client.provider.set(message.guild, "queue", this.queue);
             this.client.provider.remove(message.guild, "nowPlaying");
             message.guild.voiceConnection.playStream(ytdl(vid.ID, {filter: "audioonly"}));
-            if (this.client.provider.get(message.guild, "volume")) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
+            if (this.client.provider.get(message.guild, "volume") >= 0) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
             else message.guild.voiceConnection.dispatcher.setVolume(0.3);
             message.channel.send("Now playing: "+vid.title);
             message.guild.voiceConnection.dispatcher.on("end", reason => {
@@ -280,7 +280,7 @@ class List extends commando.Command {
             var vid = queue[0];
             console.log(vid);
             message.guild.voiceConnection.playStream(ytdl(vid.ID, {filter: "audioonly"}));
-            if (this.client.provider.get(message.guild, "volume")) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
+            if (this.client.provider.get(message.guild, "volume") >= 0) message.guild.voiceConnection.dispatcher.setVolume(this.client.provider.get(message.guild, "volume"));
             else message.guild.voiceConnection.dispatcher.setVolume(0.3);
             message.channel.send("Now playing: "+vid.title);
             this.client.provider.set(message.guild, "queue", queue);

@@ -18,6 +18,7 @@ class QueueRemove extends commando.Command {
         if (this.queue.length > 0) this.newQueue = this.queue.splice(0,1);
         await this.client.provider.set(message.guild, "queue", this.newQueue);
         console.log(this.client.provider.get(message.guild, "queue"));
+        message.reply("Removed the queue!");
     }
 }
 module.exports = QueueRemove;
