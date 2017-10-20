@@ -44,7 +44,11 @@ class SongInfo extends commando.Command {
                 return;
             }
             else {
-                console.log(data.items[0]);
+                console.log(data.items[0].snippet.thumbnails);
+                if (data.items[0].snippet.thumbnails.maxres) var img = data.items[0].snippet.thumbnails.maxres;
+                else if(data.items[0].snippet.thumbnails.high) var img = data.items[0].snippet.thumbnails.high;
+                else if(data.items[0].snippet.thumbnails.standard) var img = data.items[0].snippet.thumbnails.standard;
+                else var img = data.items[0].snippet.thumbnails.default;
                 message.channel.send({embed: {
                     "author": {
                         "name": this.queue[args.number].title,
@@ -52,9 +56,9 @@ class SongInfo extends commando.Command {
                     },
                     "color": 666,
                     "thumbnail": {
-                        "url": data.items[0].snippet.thumbnails.maxres.url,
-                        "width": data.items[0].snippet.thumbnails.maxres.width,
-                        "height": data.items[0].snippet.thumbnails.maxres.height
+                        "url": img.url,
+                        "width": img.width,
+                        "height": img.height
                     },
                     "timestamp": new Date(),
                     "fields": [{
@@ -78,12 +82,12 @@ class SongInfo extends commando.Command {
                         "inline": true
                     }, {
                         "name": "Thumbnail",
-                        "value": data.items[0].snippet.thumbnails.maxres.url
+                        "value": img.url
                     }],
                     "image":{
-                        "url": data.items[0].snippet.thumbnails.maxres.url,
-                        "width": data.items[0].snippet.thumbnails.maxres.width,
-                        "height": data.items[0].snippet.thumbnails.maxres.height
+                        "url": img.url,
+                        "width": img.width,
+                        "height": img.height
                     }
                 }});
             }

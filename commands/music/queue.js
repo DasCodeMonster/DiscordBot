@@ -21,10 +21,10 @@ class Queue extends commando.Command {
             return;
         }
         else {
+            var messageBuilder = "";
             if (message.guild.voiceConnection && message.guild.voiceConnection.dispatcher) {
                 var time = message.guild.voiceConnection.dispatcher.time;
                 var seconds = time/1000;
-                var messageBuilder = "";
             }
             else var seconds = 0;
             if (this.queue.length === 1) {

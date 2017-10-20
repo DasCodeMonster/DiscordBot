@@ -1,4 +1,5 @@
 const commando = require("discord.js-commando");
+const ytdl = require("ytdl-core");
 
 class Skip extends commando.Command {
     constructor(client) {
